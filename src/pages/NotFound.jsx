@@ -2,12 +2,14 @@ import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { Home, ArrowLeft } from "lucide-react"
 import { Button } from "../components/ui/button"
+import { useTheme } from "../themeFile/useTheme"
 
 export default function NotFound() {
   const navigate = useNavigate()
+  const { theme } = useTheme()
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4 relative overflow-hidden">
+    <div className={`min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden ${theme.bg}`}>
       {/* Decorative neon background elements */}
       <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none" />
       <div className="absolute bottom-1/3 right-1/3 w-[400px] h-[400px] bg-destructive/10 rounded-full blur-[100px] -z-10 mix-blend-screen pointer-events-none" />
@@ -30,8 +32,8 @@ export default function NotFound() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-white/5 blur-xl -z-10 rounded-full"></div>
         </motion.div>
 
-        <h1 className="text-3xl font-bold tracking-tight text-slate-800 mb-4">Page Not Found</h1>
-        <p className="text-slate-500 mb-10 text-lg">
+        <h1 className={`text-3xl font-bold tracking-tight mb-4 ${theme.textPrimary}`}>Page Not Found</h1>
+        <p className={`mb-10 text-lg ${theme.textSecondary}`}>
           The page you're looking for doesn't exist or has been moved. Let's get you back on track.
         </p>
 

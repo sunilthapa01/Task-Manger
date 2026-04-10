@@ -17,8 +17,10 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { useDispatch } from "react-redux";
-import { addTheme } from "../redux/slice/themeSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setTheme, setPalette } from "../redux/slice/themeSlice";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const colorPalettes = [
   {
@@ -58,74 +60,81 @@ const colorPalettes = [
   },
 ];
 
+import { useTheme } from "../themeFile/useTheme";
+
 export default function ThemePage() {
-  const [activePalette, setActivePalette] = useState(colorPalettes[0]);
-  const [activeMode, setActiveMode] = useState("dark");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const handleThemeChange = (mode) => {
-    dispatch(addTheme(mode.id));
+  const { theme, mode: currentTheme, themeValue } = useTheme();
 
-    setActiveMode(mode.id);
+  // Local state for color palettes and visual blobs
+  const [activePalette, setActivePalette] = useState(colorPalettes[0]);
+
+  const handleApplyChanges = () => {
+    dispatch(setTheme(themeValue));
+    dispatch(setPalette(activePalette));
+    setTimeout(() => {
+      navigate("/dashboard");
+      toast.success("Theme Applied Successfully!");
+    }, 600);
   };
-  console.log(activePalette);
 
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 300, damping: 24 },
-    },
+    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
   };
 
   return (
-    <div className="min-h-screen w-full bg-background p-6 md:p-12 relative overflow-hidden flex flex-col items-center">
-      {/* Dynamic Background Elements - strictly visual to match the selected theme */}
+    <div className={`min-h-screen w-full relative flex flex-col items-center p-6 md:p-12 transition-colors duration-500 ${theme.bg} ${theme.textPrimary}`}>
+
+      {/* Dynamic Background Elements - Visual flair matching selected palette */}
       <motion.div
         animate={{ backgroundColor: activePalette.primary }}
         transition={{ duration: 1 }}
-        className="absolute top-[-10%] sm:top-0 left-0 w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] opacity-20 rounded-full blur-[100px] sm:blur-[150px] -z-10 mix-blend-screen pointer-events-none"
+        className="absolute top-[-10%] sm:top-0 left-0 w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] opacity-20 rounded-full blur-[100px] sm:blur-[150px] -z-10 pointer-events-none"
       />
       <motion.div
         animate={{ backgroundColor: activePalette.secondary }}
         transition={{ duration: 1 }}
-        className="absolute bottom-[-10%] sm:bottom-0 right-0 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] opacity-20 rounded-full blur-[90px] sm:blur-[120px] -z-10 mix-blend-screen pointer-events-none"
+        className="absolute bottom-[-10%] sm:bottom-0 right-0 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] opacity-20 rounded-full blur-[90px] sm:blur-[120px] -z-10 pointer-events-none"
       />
 
       <div className="w-full max-w-5xl z-10 flex flex-col gap-8">
+
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 glass-panel p-6 rounded-3xl border border-black/5 shadow-sm"
+          className={`flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 rounded-3xl backdrop-blur-md transition-colors duration-500 ${theme.headerBg} ${theme.border} ${theme.shadow}`}
         >
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-800 flex items-center gap-3">
+            <h1 className={`text-3xl font-extrabold tracking-tight flex items-center gap-3 ${theme.textPrimary}`}>
               <Palette className="w-8 h-8 text-primary" />
               Appearance
             </h1>
-            <p className="text-slate-500 mt-1">
+            <p className={`mt-1 font-medium ${theme.textSecondary}`}>
               Customize your workspace experience.
             </p>
           </div>
-          <Button className="rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 group">
+          <Button
+            onClick={handleApplyChanges}
+            className="rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 group"
+          >
             <Sparkles className="w-4 h-4 group-hover:scale-125 transition-transform" />
             Apply Changes
           </Button>
         </motion.div>
 
-        <div className="ghandleThemeChangerid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
           {/* Controls Column */}
           <motion.div
             variants={containerVariants}
@@ -135,9 +144,9 @@ export default function ThemePage() {
           >
             {/* Mode Selection */}
             <motion.div variants={itemVariants}>
-              <Card className="glass-panel border-black/5 shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300">
-                <CardHeader className="pb-3 border-b border-black/5 bg-black/5">
-                  <CardTitle className="text-lg flex items-center gap-2 text-slate-700">
+              <Card className={`rounded-2xl transition-all duration-500 ${theme.cardBg} ${theme.border} ${theme.shadow}`}>
+                <CardHeader className={`pb-3 border-b ${theme.border} ${theme.headerBg}`}>
+                  <CardTitle className={`text-lg flex items-center gap-2 ${theme.textPrimary}`}>
                     <Monitor className="w-5 h-5 text-primary" />
                     Theme Mode
                   </CardTitle>
@@ -150,20 +159,17 @@ export default function ThemePage() {
                   ].map((mode) => (
                     <button
                       key={mode.id}
-                      onClick={() => handleThemeChange(mode)}
-                      className={`w-full flex items-center p-3 rounded-xl border transition-all duration-300 ${
-                        activeMode === mode.id
-                          ? "bg-primary/10 border-primary text-primary shadow-[0_4px_15px_rgba(99,102,241,0.15)] scale-[1.02]"
-                          : "bg-transparent border-black/10 hover:bg-black/5 text-slate-600 hover:scale-[1.01]"
-                      }`}
+                      onClick={() => dispatch(setTheme(mode.id))}
+                      className={`w-full flex items-center p-3 rounded-xl transition-all duration-300 ${themeValue === mode.id
+                          ? `bg-primary/10 ${theme.border} text-primary shadow-md scale-[1.02]`
+                          : `bg-transparent ${theme.border} hover:bg-black/5 ${theme.textSecondary} hover:scale-[1.01]`
+                        }`}
                     >
-                      <mode.icon
-                        className={`w-5 h-5 mr-3 ${activeMode === mode.id ? "text-primary" : "text-slate-400"}`}
-                      />
-                      <span className="font-semibold">{mode.label}</span>
-                      {activeMode === mode.id && (
+                      <mode.icon className={`w-5 h-5 mr-3 ${themeValue === mode.id ? "text-primary" : theme.textSecondary}`} />
+                      <span className="font-semibold px-2">{mode.label}</span>
+                      {themeValue === mode.id && (
                         <motion.div layoutId="modeCheck" className="ml-auto">
-                          <CheckCircle2 className="w-5 h-5" />
+                          <CheckCircle2 className="w-5 h-5 text-primary" />
                         </motion.div>
                       )}
                     </button>
@@ -174,9 +180,9 @@ export default function ThemePage() {
 
             {/* Accent Color Selection */}
             <motion.div variants={itemVariants}>
-              <Card className="glass-panel border-black/5 shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300">
-                <CardHeader className="pb-3 border-b border-black/5 bg-black/5">
-                  <CardTitle className="text-lg flex items-center gap-2 text-slate-700">
+              <Card className={`rounded-2xl transition-all duration-500 ${theme.cardBg} ${theme.border} ${theme.shadow}`}>
+                <CardHeader className={`pb-3 border-b ${theme.border} ${theme.headerBg}`}>
+                  <CardTitle className={`text-lg flex items-center gap-2 ${theme.textPrimary}`}>
                     <Palette className="w-5 h-5 text-primary" />
                     Color Palette
                   </CardTitle>
@@ -186,33 +192,18 @@ export default function ThemePage() {
                     <button
                       key={palette.id}
                       onClick={() => setActivePalette(palette)}
-                      className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${
-                        activePalette.id === palette.id
-                          ? "bg-primary/10 border-primary shadow-[0_4px_15px_rgba(99,102,241,0.15)] scale-[1.02]"
-                          : "bg-transparent border-black/10 hover:bg-black/5 hover:scale-[1.01]"
-                      }`}
+                      className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-300 ${activePalette.id === palette.id
+                          ? `bg-primary/10 ${theme.border} text-primary shadow-md scale-[1.02]`
+                          : `bg-transparent ${theme.border} hover:bg-black/5 hover:scale-[1.01]`
+                        }`}
                     >
-                      <span
-                        className={`font-semibold ${activePalette.id === palette.id ? "text-primary" : "text-slate-600"}`}
-                      >
+                      <span className={`font-semibold ${activePalette.id === palette.id ? "text-primary" : theme.textPrimary}`}>
                         {palette.name}
                       </span>
-                      <div className="flex gap-1.5 p-1 rounded-full bg-white/50 border border-black/5 shadow-sm">
-                        <div
-                          className="w-5 h-5 rounded-full"
-                          style={{ backgroundColor: palette.primary }}
-                        ></div>
-                        <div
-                          className="w-5 h-5 rounded-full"
-                          style={{ backgroundColor: palette.secondary }}
-                        ></div>
-                        <div
-                          className="w-5 h-5 rounded-full"
-                          style={{
-                            backgroundColor: palette.bg,
-                            border: "1px solid rgba(0,0,0,0.1)",
-                          }}
-                        ></div>
+                      <div className={`flex gap-1.5 p-1 rounded-full bg-white/10 ${theme.border} shadow-sm`}>
+                        <div className="w-5 h-5 rounded-full" style={{ backgroundColor: palette.primary }}></div>
+                        <div className="w-5 h-5 rounded-full" style={{ backgroundColor: palette.secondary }}></div>
+                        <div className="w-5 h-5 rounded-full" style={{ backgroundColor: palette.bg, border: "1px solid rgba(128,128,128,0.3)" }}></div>
                       </div>
                     </button>
                   ))}
@@ -225,18 +216,12 @@ export default function ThemePage() {
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{
-              duration: 0.8,
-              delay: 0.2,
-              type: "spring",
-              stiffness: 200,
-              damping: 20,
-            }}
+            transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 200, damping: 20 }}
             className="lg:col-span-2 relative"
           >
             <div className="sticky top-10">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold flex items-center gap-2 text-slate-700">
+                <h2 className={`text-xl font-bold flex items-center gap-2 ${theme.textPrimary}`}>
                   <SlidersHorizontal className="w-5 h-5" /> Live Preview
                 </h2>
                 <div className="text-xs font-medium px-3 py-1 bg-primary/10 text-primary rounded-full animate-pulse">
@@ -244,23 +229,19 @@ export default function ThemePage() {
                 </div>
               </div>
 
-              {/* The "Fake" App Canvas to demonstrate theme */}
+              {/* Fake App Canvas */}
               <motion.div
                 className="w-full aspect-[4/3] rounded-3xl border-4 shadow-2xl overflow-hidden relative flex flex-col"
                 animate={{
-                  backgroundColor:
-                    activeMode === "dark" ? "#111827" : "#ffffff",
-                  borderColor: activeMode === "dark" ? "#1f2937" : "#f3f4f6",
+                  backgroundColor: currentTheme === "dark" ? "#0f172a" : "#ffffff",
+                  borderColor: currentTheme === "dark" ? "#1e293b" : "#f1f5f9",
                 }}
                 transition={{ duration: 0.5 }}
               >
                 {/* Fake App Header */}
                 <motion.div
-                  animate={{
-                    backgroundColor:
-                      activeMode === "dark" ? "#1f2937" : "#f8f9fa",
-                  }}
-                  className="h-16 border-b flex items-center justify-between px-6 z-10"
+                  animate={{ backgroundColor: currentTheme === "dark" ? "#1e293b" : "#f8f9fa" }}
+                  className="h-16 border-b border-black/5 flex items-center justify-between px-6 z-10"
                 >
                   <div className="flex items-center gap-3">
                     <motion.div
@@ -271,10 +252,7 @@ export default function ThemePage() {
                     </motion.div>
                     <motion.div
                       className="w-32 h-4 rounded-full"
-                      animate={{
-                        backgroundColor:
-                          activeMode === "dark" ? "#374151" : "#e2e8f0",
-                      }}
+                      animate={{ backgroundColor: currentTheme === "dark" ? "#334155" : "#e2e8f0" }}
                     />
                   </div>
                   <div className="flex gap-2">
@@ -282,10 +260,7 @@ export default function ThemePage() {
                       <motion.div
                         key={i}
                         className="w-8 h-8 rounded-full"
-                        animate={{
-                          backgroundColor:
-                            activeMode === "dark" ? "#374151" : "#e2e8f0",
-                        }}
+                        animate={{ backgroundColor: currentTheme === "dark" ? "#334155" : "#e2e8f0" }}
                       />
                     ))}
                   </div>
@@ -302,20 +277,11 @@ export default function ThemePage() {
                         animate={{
                           backgroundColor:
                             i === 2
-                              ? activeMode === "dark"
-                                ? `${activePalette.primary}33`
-                                : `${activePalette.primary}22`
-                              : activeMode === "dark"
-                                ? "#1f2937"
-                                : "#f8f9fa",
+                              ? currentTheme === "dark" ? `${activePalette.primary}33` : `${activePalette.primary}22`
+                              : currentTheme === "dark" ? "#1e293b" : "#f8f9fa",
                           color: i === 2 ? activePalette.primary : "inherit",
                         }}
-                        style={{
-                          borderLeft:
-                            i === 2
-                              ? `4px solid ${activePalette.primary}`
-                              : "none",
-                        }}
+                        style={{ borderLeft: i === 2 ? `4px solid ${activePalette.primary}` : "none" }}
                       />
                     ))}
                   </motion.div>
@@ -330,9 +296,8 @@ export default function ThemePage() {
                           whileHover={{ y: -5, scale: 1.02 }}
                           className="h-28 rounded-2xl p-4 shadow-sm relative overflow-hidden"
                           animate={{
-                            backgroundColor:
-                              activeMode === "dark" ? "#1f2937" : "#ffffff",
-                            border: `1px solid ${activeMode === "dark" ? "#374151" : "#f1f5f9"}`,
+                            backgroundColor: currentTheme === "dark" ? "#1e293b" : "#ffffff",
+                            border: `1px solid ${currentTheme === "dark" ? "#334155" : "#f1f5f9"}`,
                           }}
                         >
                           <motion.div
@@ -341,23 +306,15 @@ export default function ThemePage() {
                           />
                           <motion.div
                             className="w-10 h-10 rounded-xl mb-3"
-                            animate={{
-                              backgroundColor: `${activePalette[col]}33`,
-                            }}
+                            animate={{ backgroundColor: `${activePalette[col]}33` }}
                           />
                           <motion.div
                             className="w-1/2 h-3 rounded-full mb-2"
-                            animate={{
-                              backgroundColor:
-                                activeMode === "dark" ? "#4b5563" : "#cbd5e1",
-                            }}
+                            animate={{ backgroundColor: currentTheme === "dark" ? "#475569" : "#cbd5e1" }}
                           />
                           <motion.div
                             className="w-1/3 h-5 rounded-full"
-                            animate={{
-                              backgroundColor:
-                                activeMode === "dark" ? "#e5e7eb" : "#334155",
-                            }}
+                            animate={{ backgroundColor: currentTheme === "dark" ? "#94a3b8" : "#334155" }}
                           />
                         </motion.div>
                       ))}
@@ -367,18 +324,13 @@ export default function ThemePage() {
                     <motion.div
                       className="flex-1 rounded-2xl p-5 shadow-sm border"
                       animate={{
-                        backgroundColor:
-                          activeMode === "dark" ? "#1f2937" : "#ffffff",
-                        borderColor:
-                          activeMode === "dark" ? "#374151" : "#f1f5f9",
+                        backgroundColor: currentTheme === "dark" ? "#1e293b" : "#ffffff",
+                        borderColor: currentTheme === "dark" ? "#334155" : "#f1f5f9",
                       }}
                     >
                       <motion.div
                         className="w-1/3 h-4 rounded-full mb-6"
-                        animate={{
-                          backgroundColor:
-                            activeMode === "dark" ? "#4b5563" : "#cbd5e1",
-                        }}
+                        animate={{ backgroundColor: currentTheme === "dark" ? "#475569" : "#cbd5e1" }}
                       />
 
                       <div className="space-y-4">
@@ -386,25 +338,16 @@ export default function ThemePage() {
                           <div key={item} className="flex items-center gap-4">
                             <motion.div
                               className="w-3 h-3 rounded-full"
-                              animate={{
-                                backgroundColor: activePalette.primary,
-                              }}
+                              animate={{ backgroundColor: activePalette.primary }}
                             />
                             <div className="flex-1">
                               <motion.div
                                 className="w-full h-2 rounded-full mb-2"
-                                animate={{
-                                  backgroundColor:
-                                    activeMode === "dark"
-                                      ? "#374151"
-                                      : "#f1f5f9",
-                                }}
+                                animate={{ backgroundColor: currentTheme === "dark" ? "#334155" : "#f1f5f9" }}
                               />
                               <motion.div
                                 className="h-2 rounded-full"
-                                animate={{
-                                  backgroundColor: activePalette.secondary,
-                                }}
+                                animate={{ backgroundColor: activePalette.secondary }}
                                 style={{ width: `${Math.random() * 40 + 40}%` }}
                               />
                             </div>

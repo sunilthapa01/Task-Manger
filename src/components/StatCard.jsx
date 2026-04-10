@@ -1,8 +1,11 @@
 import { motion } from "framer-motion"
 import { Card, CardContent } from "./ui/card"
 import { cn } from "../lib/utils"
+import { useTheme } from "../themeFile/useTheme"
 
 export default function StatCard({ title, value, icon: Icon, trend, trendUp }) {
+
+  const { theme, mode, activePalette } = useTheme();
   return (
     <motion.div
       variants={{
@@ -13,20 +16,23 @@ export default function StatCard({ title, value, icon: Icon, trend, trendUp }) {
       transition={{ duration: 0.3 }}
       className="group"
     >
-      <Card className="relative overflow-hidden">
+      <Card className="relative overflow-hidden transition-all duration-300">
         {/* Subtle background glow */}
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/10 blur-3xl transition-all duration-500 group-hover:bg-primary/20" />
-        
+        <div 
+          className="absolute right-[-20px] top-[-20px] w-32 h-32 rounded-full opacity-20 blur-2xl transition-colors duration-500 pointer-events-none"
+          style={{ backgroundColor: activePalette?.primary || "#39FF14" }}
+        />
+
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-foreground/60">{title}</h3>
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-black/5 flex items-center justify-center border border-black/5">
-              <Icon className="h-5 w-5 text-foreground/80" />
+            <h3 className={`text-sm font-medium ${theme.textSecondary}`}>{title}</h3>
+            <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center transition-colors duration-500`} style={{ backgroundColor: `${activePalette?.primary || "#39FF14"}33` }}>
+              <Icon className="h-5 w-5" style={{ color: activePalette?.primary || "#39FF14" }} />
             </div>
           </div>
-          
+
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight">{value}</span>
+            <span className={`${theme.textPrimary} text-3xl font-bold tracking-tight`}>{value}</span>
             <span className={cn(
               "text-xs font-medium",
               trendUp ? "text-success" : "text-danger"

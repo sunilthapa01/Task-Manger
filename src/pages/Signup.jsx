@@ -9,41 +9,43 @@ import { Button } from "../components/ui/button";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../redux/slice/authSlice";
-import { form } from "framer-motion/m";
+import { useTheme } from "../themeFile/useTheme";
 
 export default function Signup() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { theme } = useTheme();
+
   const [formData, setformData] = useState({
     name: "",
     email: "",
     password: "",
   });
 
-  const HandleChange = (e)=> {
-    const {name,value} = e.target
-    setformData(prev => ({...prev,[name]:value}))
+  const HandleChange = (e) => {
+    const { name, value } = e.target
+    setformData(prev => ({ ...prev, [name]: value }))
   }
   console.log(formData);
-  
 
-const HandleSubmit = async (e) => {
-  e.preventDefault();
 
-  try {
-    await dispatch(registerUser(formData)).unwrap();
+  const HandleSubmit = async (e) => {
+    e.preventDefault();
 
-    toast.success("Account created successfully!");
-    navigate("/dashboard");
+    try {
+      await dispatch(registerUser(formData)).unwrap();
 
-  } catch (err) {
-    console.log(err);
-    toast.error(err || "Registration failed");
-  }
-};
+      toast.success("Account created successfully!");
+      navigate("/dashboard");
+
+    } catch (err) {
+      console.log(err);
+      toast.error(err || "Registration failed");
+    }
+  };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4 relative overflow-hidden">
+    <div className={`min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden ${theme.bg}`}>
       {/* Decorative neon background elements */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none" />
       <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-accent/20 rounded-full blur-[90px] -z-10 mix-blend-screen pointer-events-none" />
@@ -54,7 +56,7 @@ const HandleSubmit = async (e) => {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-md"
       >
-        <Card className="glass-panel border-black/5 shadow-[0_4px_30px_rgba(0,0,0,0.05)]">
+        <Card className={`glass-panel shadow-[0_4px_30px_rgba(0,0,0,0.05)] ${theme.cardBg} ${theme.border}`}>
           <CardContent className="p-8">
             <div className="text-center mb-8">
               <motion.div
@@ -65,21 +67,21 @@ const HandleSubmit = async (e) => {
               >
                 <User className="w-6 h-6 text-white" />
               </motion.div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-800 mb-2">
+              <h1 className={`text-2xl font-bold tracking-tight mb-2 ${theme.textPrimary}`}>
                 Create an Account
               </h1>
-              <p className="text-sm text-foreground/60">
+              <p className={`text-sm ${theme.textSecondary}`}>
                 Join us and start managing your tasks efficiently
               </p>
             </div>
 
             <form className="space-y-4" onSubmit={HandleSubmit}>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">
+                <label className={`text-sm font-medium ${theme.textSecondary}`}>
                   Full Name
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
+                  <User className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${theme.textSecondary}`} />
                   <Input
                     type="text"
                     placeholder="John Doe"
@@ -87,17 +89,17 @@ const HandleSubmit = async (e) => {
                     value={formData.name}
                     onChange={HandleChange}
                     required
-                    className="pl-10 bg-black/5 border-black/5 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
+                    className={`pl-10 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 ${theme.headerBg} ${theme.border}`}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">
+                <label className={`text-sm font-medium ${theme.textSecondary}`}>
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
+                  <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${theme.textSecondary}`} />
                   <Input
                     type="email"
                     placeholder="name@example.com"
@@ -105,17 +107,17 @@ const HandleSubmit = async (e) => {
                     value={formData.email}
                     onChange={HandleChange}
                     required
-                    className="pl-10 bg-black/5 border-black/5 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
+                    className={`pl-10 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 ${theme.headerBg} ${theme.border}`}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">
+                <label className={`text-sm font-medium ${theme.textSecondary}`}>
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
+                  <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${theme.textSecondary}`} />
                   <Input
                     type="password"
                     placeholder="••••••••"
@@ -123,7 +125,7 @@ const HandleSubmit = async (e) => {
                     value={formData.password}
                     onChange={HandleChange}
                     required
-                    className="pl-10 bg-black/5 border-black/5 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
+                    className={`pl-10 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 ${theme.headerBg} ${theme.border}`}
                   />
                 </div>
               </div>
@@ -139,7 +141,7 @@ const HandleSubmit = async (e) => {
 
             <div className="mt-6 flex items-center gap-3">
               <div className="flex-1 h-px bg-black/10"></div>
-              <span className="text-xs text-foreground/40 font-medium px-2">
+              <span className={`text-xs font-medium px-2 ${theme.textSecondary}`}>
                 OR CONTINUE WITH
               </span>
               <div className="flex-1 h-px bg-black/10"></div>
@@ -153,7 +155,7 @@ const HandleSubmit = async (e) => {
               SSO Sign Up
             </Button>
 
-            <p className="text-center text-sm text-foreground/60 mt-8">
+            <p className={`text-center text-sm mt-8 ${theme.textSecondary}`}>
               Already have an account?{" "}
               <span
                 onClick={() => navigate("/login")}

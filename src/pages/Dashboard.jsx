@@ -17,6 +17,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useTheme } from "../themeFile/useTheme";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,11 +42,27 @@ export default function Dashboard() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const FormSelector = useSelector((item) => item.taskStore.taskData);
+
+  const { theme, mode, activePalette } = useTheme();
+
+
   const CountCompleted = FormSelector.filter(
     (e) => e.completed === true,
   ).length;
   return (
-    <div className="flex min-h-screen w-full bg-background overflow-hidden selection:bg-primary/30">
+    <div className={`${theme.bg} flex min-h-screen w-full relative overflow-hidden`}>
+      {/* GLOBALLY INJECTED THEME PALETTE BLOBS */}
+      <motion.div
+        animate={{ backgroundColor: activePalette?.primary || "#39FF14" }}
+        transition={{ duration: 1 }}
+        className="fixed top-[-10%] sm:top-0 left-0 w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] opacity-10 sm:opacity-15 rounded-full blur-[100px] sm:blur-[150px] -z-10 pointer-events-none"
+      />
+      <motion.div
+        animate={{ backgroundColor: activePalette?.secondary || "#8A2BE2" }}
+        transition={{ duration: 1 }}
+        className="fixed bottom-[-10%] sm:bottom-0 right-0 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] opacity-10 sm:opacity-15 rounded-full blur-[90px] sm:blur-[120px] -z-10 pointer-events-none"
+      />
+
       <Sidebar isMobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       <div className="flex-1 flex flex-col min-w-0 md:pl-20 transition-all duration-300">
@@ -66,7 +83,7 @@ export default function Dashboard() {
             >
               <div>
                 <motion.h2
-                  className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-500 mb-2"
+                  className={`${theme.textPrimary} text-3xl md:text-4xl font-bold tracking-tight mb-2`}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2, duration: 0.7 }}
@@ -74,7 +91,7 @@ export default function Dashboard() {
                   Welcome back, Alex
                 </motion.h2>
                 <motion.p
-                  className="text-foreground/60 text-sm md:text-base font-medium"
+                  className={`${theme.textSecondary} text-sm md:text-base font-medium`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4, duration: 0.7 }}
@@ -144,9 +161,9 @@ export default function Dashboard() {
                   viewport={{ once: true, margin: "-50px" }}
                   className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10"
                 >
-                  <Card>
+                  <Card className={`${theme.cardBg} ${theme.border} ${theme.shadow}`}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base font-medium text-foreground/80">
+                      <CardTitle className={`text-base font-medium ${theme.textSecondary}`}>
                         Weekly Productivity
                       </CardTitle>
                     </CardHeader>
@@ -154,20 +171,21 @@ export default function Dashboard() {
                       {/* Placeholder for Line Chart UI */}
                       <div className="flex items-end justify-between h-full w-full gap-2 px-2 mt-4 relative">
                         {/* Decorative Grid Lines */}
-                        <div className="absolute inset-0 border-b border-dashed border-black/5 top-1/2 -z-10" />
-                        <div className="absolute inset-0 border-b border-dashed border-black/5 top-1/4 -z-10" />
+                        <div className={`absolute inset-0 border-b border-dashed ${theme.border} top-1/2 -z-10`} />
+                        <div className={`absolute inset-0 border-b border-dashed ${theme.border} top-1/4 -z-10`} />
 
                         {[40, 70, 45, 90, 65, 85, 100].map((h, i) => (
                           <div key={i} className="w-full relative group">
                             <motion.div
                               initial={{ height: 0 }}
-                              animate={{ height: `${h}%` }}
+                              animate={{ height: `${h}%`, backgroundColor: `${activePalette?.primary || "#39FF14"}CC` }}
+                              whileHover={{ backgroundColor: activePalette?.primary || "#39FF14", scaleY: 1.05 }}
                               transition={{
                                 delay: 0.5 + i * 0.1,
                                 duration: 0.8,
                                 type: "spring",
                               }}
-                              className="w-full bg-gradient-to-t from-primary/20 to-primary/80 rounded-t-sm group-hover:from-primary/40 group-hover:to-primary transition-all cursor-pointer relative"
+                              className="w-full rounded-t-sm transition-all cursor-pointer relative"
                             >
                               <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-xs px-2 py-1 rounded hidden md:block">
                                 {h}%
@@ -179,22 +197,26 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className={`${theme.cardBg} ${theme.border} ${theme.shadow}`}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base font-medium text-foreground/80">
+                      <CardTitle className={`text-base font-medium ${theme.textSecondary}`}>
                         Task Distribution
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="h-48 md:h-64 flex items-center justify-center relative">
                       {/* Placeholder for Pie Chart UI */}
-                      <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-[16px] border-primary/20 flex items-center justify-center after:content-[''] after:absolute after:inset-[-16px] after:rounded-full after:border-[16px] after:border-t-primary after:border-r-primary after:border-b-accent after:border-l-transparent after:-rotate-45">
+                      <motion.div 
+                        animate={{ borderColor: `${activePalette?.primary || "#39FF14"}33` }}
+                        className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-[16px] flex items-center justify-center after:content-[''] after:absolute after:inset-[-16px] after:rounded-full after:border-[16px] after:border-l-transparent after:-rotate-45"
+                        style={{ borderTopColor: activePalette?.primary || "#39FF14", borderRightColor: activePalette?.primary || "#39FF14", borderBottomColor: activePalette?.secondary || "#8A2BE2" }}
+                      >
                         <div className="text-center">
                           <span className="block text-2xl font-bold">64%</span>
-                          <span className="text-xs text-foreground/50 hidden sm:block">
+                          <span className={`${theme.textSecondary} text-xs hidden sm:block`}>
                             Work
                           </span>
                         </div>
-                      </div>
+                      </motion.div>
                     </CardContent>
                   </Card>
                 </motion.section>
@@ -208,16 +230,17 @@ export default function Dashboard() {
                   className="relative z-10"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold tracking-tight">
+                    <h3 className={`text-lg font-semibold tracking-tight ${theme.textPrimary}`}>
                       Habit Tracker
                     </h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-primary hover:text-primary-light"
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-sm font-medium transition-colors"
+                      style={{ color: activePalette?.primary || "#39FF14" }}
                     >
                       View All
-                    </Button>
+                    </motion.button>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
                     <HabitCard
@@ -249,18 +272,18 @@ export default function Dashboard() {
                 className="relative z-10"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold tracking-tight">
+                  <h3 className={`text-lg font-semibold tracking-tight ${theme.textPrimary}`}>
                     Today's Tasks
                   </h3>
                   <Badge
                     variant="outline"
-                    className="px-2 font-normal text-foreground/70"
+                    className={`px-2 font-normal ${theme.textSecondary}`}
                   >
                     {CountCompleted} Remaining
                   </Badge>
                 </div>
 
-                <Card className="glass-panel border-black/5 bg-background/90 backdrop-blur-2xl p-1 overflow-hidden">
+                <Card className={`glass-panel p-1 overflow-hidden backdrop-blur-2xl ${theme.cardBg} ${theme.border} ${theme.shadow}`}>
                   <div className="flex flex-col gap-1 md:gap-2">
                     {FormSelector.map((e) => (
                       <TaskCard
@@ -275,9 +298,17 @@ export default function Dashboard() {
                   </div>
                 </Card>
 
-                <Button className="w-full mt-4 bg-black/5 text-foreground hover:bg-primary/20 hover:text-primary border-dashed border border-black/10 hover:border-primary/50 shadow-none transition-all duration-300">
-                  <Plus className="h-4 w-4 mr-2" /> View All Tasks
-                </Button>
+                <motion.button 
+                  className={`w-full mt-4 flex items-center justify-center gap-2 py-2 px-4 rounded-lg transition-all duration-300 ${theme.headerBg} ${theme.textPrimary} bg-transparent border border-dashed shadow-none`}
+                  initial={{ borderColor: theme.border }}
+                  whileHover={{ 
+                    backgroundColor: `${activePalette?.primary || "#39FF14"}22`, 
+                    color: activePalette?.primary || "#39FF14", 
+                    borderColor: activePalette?.primary || "#39FF14" 
+                  }}
+                >
+                  <Plus className="h-4 w-4" /> View All Tasks
+                </motion.button>
               </motion.section>
             </div>
           </motion.div>

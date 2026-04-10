@@ -8,10 +8,11 @@ import { Button } from "./ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { addTaskPost } from "../redux/slice/taskSlice";
 import { toast } from "react-toastify";
+import { useTheme } from "../themeFile/useTheme";
 
 export default function TaskForm() {
-  // const TaskData = useSelector(item => item.taskStore.taskData)
   const dispatch = useDispatch();
+  const { theme } = useTheme();
   // console.log(TaskData)
   const [TaskFormData, setTaskFormData] = useState({
     title: "",
@@ -70,11 +71,11 @@ const isValid = Object.entries(TaskFormData).every(([_, value]) => {
 
   // console.log(TaskFormData)
   return (
-    <Card className="glass-panel border-black/10 bg-background/50 shadow-sm mt-6">
+    <Card className={`glass-panel mt-6 ${theme.cardBg} ${theme.border} ${theme.shadow}`}>
       <CardContent className="p-6 md:p-8 space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground/80">
+            <label className={`text-sm font-medium ${theme.textSecondary}`}>
               Task Title
             </label>
             <Input
@@ -83,11 +84,12 @@ const isValid = Object.entries(TaskFormData).every(([_, value]) => {
               name="title"
               onChange={HandlChange}
               value={TaskFormData.title}
+              className={`${theme.headerBg} ${theme.border}`}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground/80">
+            <label className={`text-sm font-medium ${theme.textSecondary}`}>
               Description
             </label>
             <Textarea
@@ -95,18 +97,20 @@ const isValid = Object.entries(TaskFormData).every(([_, value]) => {
               value={TaskFormData.description}
               onChange={HandlChange}
               placeholder="Enter task description"
+              className={`${theme.headerBg} ${theme.border}`}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">
+              <label className={`text-sm font-medium ${theme.textSecondary}`}>
                 Priority
               </label>
               <Select
                 name="priority"
                 value={TaskFormData.priority}
                 onChange={HandlChange}
+                className={`${theme.headerBg} ${theme.border}`}
               >
                 <option value="" disabled>
                   Select priority
@@ -118,7 +122,7 @@ const isValid = Object.entries(TaskFormData).every(([_, value]) => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">
+              <label className={`text-sm font-medium ${theme.textSecondary}`}>
                 Due Date
               </label>
               <Input
@@ -126,19 +130,21 @@ const isValid = Object.entries(TaskFormData).every(([_, value]) => {
                 name="dueDate"
                 value={TaskFormData.dueDate}
                 onChange={HandlChange}
+                className={`${theme.headerBg} ${theme.border}`}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">
+              <label className={`text-sm font-medium ${theme.textSecondary}`}>
                 Category / Tag
               </label>
               <Select
                 onChange={HandlChange}
                 name="category"
                 value={TaskFormData.category}
+                className={`${theme.headerBg} ${theme.border}`}
               >
                 <option value="" disabled>
                   Select category
@@ -150,7 +156,7 @@ const isValid = Object.entries(TaskFormData).every(([_, value]) => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">
+              <label className={`text-sm font-medium ${theme.textSecondary}`}>
                 Estimated Time
               </label>
               <Input
@@ -159,16 +165,17 @@ const isValid = Object.entries(TaskFormData).every(([_, value]) => {
                 name="estimated"
                 value={TaskFormData.estimated}
                 onChange={HandlChange}
+                className={`${theme.headerBg} ${theme.border}`}
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-lg bg-black/5 border border-black/5">
+          <div className={`flex items-center justify-between p-4 rounded-lg border ${theme.headerBg} ${theme.border}`}>
             <div className="space-y-0.5">
-              <label className="text-sm font-medium text-foreground">
+              <label className={`text-sm font-medium ${theme.textPrimary}`}>
                 Mark as completed
               </label>
-              <p className="text-xs text-foreground/60">
+              <p className={`text-xs ${theme.textSecondary}`}>
                 Instantly archive this task upon creation.
               </p>
             </div>
@@ -179,9 +186,9 @@ const isValid = Object.entries(TaskFormData).every(([_, value]) => {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-4 pt-4 border-t border-black/10">
-          <Button variant="outline">Cancel</Button>
-          <Button onClick={AddTask}>Add Task</Button>
+        <div className={`flex items-center justify-end gap-4 pt-4 border-t ${theme.border}`}>
+          <Button variant="outline" className={`${theme.headerBg} ${theme.textPrimary} border-none shadow-sm`}>Cancel</Button>
+          <Button onClick={AddTask} className={`shadow-md`}>Add Task</Button>
         </div>
       </CardContent>
     </Card>

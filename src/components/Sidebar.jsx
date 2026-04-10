@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { Button } from "./ui/button"
+import { useTheme } from "../themeFile/useTheme"
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -27,14 +28,22 @@ export default function Sidebar({ isMobileOpen, setMobileOpen }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const location = useLocation()
   const currentPath = location.pathname
+  const { theme, activePalette } = useTheme()
+  const safePalette = activePalette || { primary: "#39FF14", secondary: "#8A2BE2" }
 
   const sidebarWidth = isCollapsed ? "w-20" : "w-64"
 
   const content = (
-    <div className="flex w-64 h-full flex-col bg-background/90 backdrop-blur-xl border-r border-black/5">
+    <div className={`flex w-64 h-full flex-col backdrop-blur-xl border-r ${theme.headerBg} ${theme.border}`}>
       <div className="flex h-16 items-center px-4 justify-between h-20">
         <div className="flex items-center gap-3 overflow-hidden ml-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-[#39FF14] via-[#00FF00] to-[#03ff00] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(57,255,20,0.6)]">
+          <div 
+            className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: `linear-gradient(to top right, ${safePalette.primary}, ${safePalette.secondary})`,
+              boxShadow: `0 0 15px ${safePalette.primary}99`
+            }}
+          >
             <LayoutDashboard className="h-4 w-4 text-black" />
           </div>
           <AnimatePresence>
@@ -54,7 +63,7 @@ export default function Sidebar({ isMobileOpen, setMobileOpen }) {
           variant="ghost" 
           size="icon" 
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden md:flex text-foreground/50 hover:text-foreground"
+          className={`hidden md:flex ${theme.textSecondary} hover:${theme.textPrimary}`}
         >
           <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", isCollapsed && "rotate-180")} />
         </Button>
@@ -74,19 +83,29 @@ export default function Sidebar({ isMobileOpen, setMobileOpen }) {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-3 transition-colors duration-200 group relative",
                   isActive 
-                    ? "text-slate-900 bg-black/5" 
-                    : "text-foreground/60 hover:text-foreground hover:bg-black/5"
+                    ? `${theme.textPrimary}` 
+                    : `${theme.textSecondary} hover:opacity-80`
                 )}
               >
                 {isActive && (
                   <motion.div 
                     layoutId="activeTab"
-                    className="absolute inset-0 rounded-xl border border-black/5 bg-black/5 -z-10"
+                    className={`absolute inset-0 rounded-xl -z-10`}
+                    style={{
+                      backgroundColor: `${safePalette.primary}22`,
+                      borderLeft: `4px solid ${safePalette.primary}`
+                    }}
                     initial={false}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
-                <item.icon className={cn("h-5 w-5 shrink-0 transition-all duration-300", isActive && "text-[#39FF14] drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]")} />
+                <item.icon 
+                  className={cn("h-5 w-5 shrink-0 transition-all duration-300")} 
+                  style={{ 
+                    color: isActive ? safePalette.primary : undefined, 
+                    filter: isActive ? `drop-shadow(0 0 8px ${safePalette.primary}CC)` : undefined 
+                  }} 
+                />
                 <AnimatePresence>
                   {!isCollapsed && (
                     <motion.span
@@ -105,13 +124,16 @@ export default function Sidebar({ isMobileOpen, setMobileOpen }) {
         })}
       </div>
 
-      <div className="p-4 border-t border-black/5">
-        <div className={cn("flex items-center gap-3 rounded-xl bg-black/5 p-2 transition-all", isCollapsed ? "justify-center" : "")}>
-          <div className="h-9 w-9 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shrink-0" />
+      <div className={`p-4 border-t ${theme.border}`}>
+        <div className={cn("flex items-center gap-3 rounded-xl p-2 transition-all bg-black/5 dark:bg-white/5", isCollapsed ? "justify-center" : "")}>
+          <div 
+            className="h-9 w-9 rounded-full shrink-0" 
+            style={{ background: `linear-gradient(to right, ${safePalette.primary}, ${safePalette.secondary})` }}
+          />
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <p className="text-sm font-medium text-slate-800 truncate">Alex Morgan</p>
-              <p className="text-xs text-foreground/50 truncate">Pro Plan</p>
+              <p className={`text-sm font-medium truncate ${theme.textPrimary}`}>Alex Morgan</p>
+              <p className={`text-xs truncate ${theme.textSecondary}`}>Pro Plan</p>
             </div>
           )}
         </div>
