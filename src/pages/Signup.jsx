@@ -33,14 +33,19 @@ export default function Signup() {
     e.preventDefault();
 
     try {
-      await dispatch(registerUser(formData)).unwrap();
+      const result = await dispatch(registerUser(formData)).unwrap();
+
+      localStorage.setItem("user", JSON.stringify(result));
+      localStorage.setItem("token", "mock-jwt-token-for-dev");
+      localStorage.setItem("isAuthenticated", "true");
 
       toast.success("Account created successfully!");
       navigate("/dashboard");
 
     } catch (err) {
       console.log(err);
-      toast.error(err || "Registration failed");
+      const errorMsg = err?.message || err || "Registration failed";
+      toast.error(errorMsg);
     }
   };
 
@@ -63,7 +68,7 @@ export default function Signup() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", delay: 0.1 }}
-                className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent shadow-[0_0_20px_rgba(99,102,241,0.5)] flex items-center justify-center mb-4"
+                className="mx-auto w-12 h-12 rounded-xl bg-primary shadow-[0_0_20px_rgba(99,102,241,0.5)] flex items-center justify-center mb-4"
               >
                 <User className="w-6 h-6 text-white" />
               </motion.div>

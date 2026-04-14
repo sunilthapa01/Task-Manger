@@ -10,7 +10,18 @@ import NotFound from "./pages/NotFound"
 import ProtectedRoute from "./components/ProtectedRoute"
 import ThemePage from "./pages/ThemePage"
 
+import { useTheme } from "./themeFile/useTheme"
+import { useEffect } from "react"
+
 function App() {
+  const { activePalette } = useTheme()
+
+  useEffect(() => {
+    if (activePalette) {
+      document.documentElement.style.setProperty('--theme-primary', activePalette.primary);
+    }
+  }, [activePalette])
+
   return (
     <>
       <ToastContainer 

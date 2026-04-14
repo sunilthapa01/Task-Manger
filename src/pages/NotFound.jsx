@@ -26,7 +26,7 @@ export default function NotFound() {
           transition={{ type: "spring", delay: 0.2 }}
           className="relative inline-block mb-8"
         >
-          <div className="text-[150px] font-black leading-none bg-clip-text text-transparent bg-gradient-to-br from-primary via-accent to-primary/50 drop-shadow-sm">
+          <div className="text-[150px] font-black leading-none text-primary drop-shadow-sm">
             404
           </div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-white/5 blur-xl -z-10 rounded-full"></div>

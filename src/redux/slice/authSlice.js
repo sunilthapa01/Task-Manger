@@ -6,8 +6,9 @@ export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (userData, thunkAPI) => {
     try {
+    const baseURL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
     const response = await axios.post(
-        `https://task-lh70.onrender.com/auth/register`,
+        `${baseURL}/users`,
         userData
       );
 

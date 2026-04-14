@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LayoutList, CheckCircle2, Zap, Flame, Plus } from "lucide-react";
+import { LayoutList, CheckCircle2, Zap, Flame, Plus, Bell } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
@@ -16,8 +16,9 @@ import {
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "../themeFile/useTheme";
+import { fetchTasks, clearNotifications } from "../redux/slice/taskSlice";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,14 +42,106 @@ const itemVariants = {
 export default function Dashboard() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const FormSelector = useSelector((item) => item.taskStore.taskData);
 
-  const { theme, mode, activePalette } = useTheme();
+  const [userData, setUserData] = useState(null);
+
+  useEffect(()=> {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if(!user){
+      navigate("/login");
+    } else {
+      setUserData(user);
+    }
+    console.log(user);
+    
+    dispatch(fetchTasks());
+  }, [dispatch, navigate]);
+  
+  const { theme,activePalette } = useTheme();
 
 
-  const CountCompleted = FormSelector.filter(
-    (e) => e.completed === true,
-  ).length;
+  const searchQuery = useSelector((state) => state.taskStore.searchQuery);
+  const notifications = useSelector((state) => state.taskStore.notifications);
+
+  const filteredTasks = FormSelector.filter((task) => {
+    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  const completedTasks = FormSelector.filter((e) => e.completed === true);
+  const totalTasks = FormSelector.length;
+  
+  // Productivity Score Calculation
+  const productivityScore = totalTasks > 0 ? Math.round((completedTasks.length / totalTasks) * 100) : 0;
+
+  // Streak Calculation (Simplified based on dueDate)
+  const getStreak = () => {
+    if (completedTasks.length === 0) return 0;
+    
+    const dates = completedTasks
+      .map(t => t.dueDate)
+      .filter(d => d)
+      .map(d => new Date(d).toDateString());
+    
+    const uniqueDates = [...new Set(dates)].sort((a, b) => new Date(b) - new Date(a));
+    
+    let streak = 0;
+    let today = new Date();
+    today.setHours(0,0,0,0);
+    
+    // Check if the latest completion was today or yesterday
+    const latestDate = new Date(uniqueDates[0]);
+    const diffDays = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 1) return 0; // Streak broken
+
+    for (let i = 0; i < uniqueDates.length - 1; i++) {
+      const d1 = new Date(uniqueDates[i]);
+      const d2 = new Date(uniqueDates[i+1]);
+      const diff = Math.floor((d1 - d2) / (1000 * 60 * 60 * 24));
+      
+      if (diff === 1) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    
+    return streak + 1;
+  };
+
+  const currentStreak = getStreak();
+
+  // Weekly Productivity Data Preparation
+  const getLast7Days = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d.toDateString());
+    }
+    return days;
+  };
+
+  const weeklyData = getLast7Days().map(date => {
+    const count = completedTasks.filter(t => new Date(t.dueDate).toDateString() === date).length;
+    return { date, count };
+  });
+
+  const maxWeeklyCount = Math.max(...weeklyData.map(d => d.count), 1);
+
+  // Distribution Data
+  const categories = ["work", "personal", "learning"];
+  const distributionData = categories.map(cat => {
+    const count = FormSelector.filter(t => t.category === cat).length;
+    const percentage = totalTasks > 0 ? Math.round((count / totalTasks) * 100) : 0;
+    return { category: cat, percentage };
+  });
+
+  const CountCompleted = completedTasks.length;
   return (
     <div className={`${theme.bg} flex min-h-screen w-full relative overflow-hidden`}>
       {/* GLOBALLY INJECTED THEME PALETTE BLOBS */}
@@ -88,7 +181,7 @@ export default function Dashboard() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2, duration: 0.7 }}
                 >
-                  Welcome back, Alex
+                  Welcome back, {userData?.name || "User"}
                 </motion.h2>
                 <motion.p
                   className={`${theme.textSecondary} text-sm md:text-base font-medium`}
@@ -110,6 +203,36 @@ export default function Dashboard() {
                 New Task
               </Button>
             </motion.section>
+
+            {/* Notification Bar */}
+            {notifications.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className={`relative z-10 px-6 py-3 rounded-2xl border flex items-center gap-3 ${theme.headerBg} ${theme.border} shadow-sm overflow-hidden group`}
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                  <Bell className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${theme.textPrimary} truncate`}>
+                    {notifications[0].text}
+                  </p>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs opacity-50 hover:opacity-100"
+                  onClick={() => dispatch(clearNotifications())}
+                >
+                  Dismiss
+                </Button>
+                <div 
+                  className="absolute bottom-0 left-0 h-1 bg-primary/30" 
+                  style={{ width: '100%' }}
+                />
+              </motion.div>
+            )}
 
             {/* Stats Grid */}
             <motion.section
@@ -135,16 +258,16 @@ export default function Dashboard() {
               />
               <StatCard
                 title="Productivity Score"
-                value="92"
+                value={`${productivityScore}%`}
                 icon={Zap}
-                trend="-2%"
-                trendUp={false}
+                trend="+3%"
+                trendUp={true}
               />
               <StatCard
                 title="Current Streak"
-                value="14 Days"
+                value={`${currentStreak} Days`}
                 icon={Flame}
-                trend="+2 Days"
+                trend="+1 Day"
                 trendUp={true}
               />
             </motion.section>
@@ -174,25 +297,28 @@ export default function Dashboard() {
                         <div className={`absolute inset-0 border-b border-dashed ${theme.border} top-1/2 -z-10`} />
                         <div className={`absolute inset-0 border-b border-dashed ${theme.border} top-1/4 -z-10`} />
 
-                        {[40, 70, 45, 90, 65, 85, 100].map((h, i) => (
-                          <div key={i} className="w-full relative group">
-                            <motion.div
-                              initial={{ height: 0 }}
-                              animate={{ height: `${h}%`, backgroundColor: `${activePalette?.primary || "#39FF14"}CC` }}
-                              whileHover={{ backgroundColor: activePalette?.primary || "#39FF14", scaleY: 1.05 }}
-                              transition={{
-                                delay: 0.5 + i * 0.1,
-                                duration: 0.8,
-                                type: "spring",
-                              }}
-                              className="w-full rounded-t-sm transition-all cursor-pointer relative"
-                            >
-                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-xs px-2 py-1 rounded hidden md:block">
-                                {h}%
-                              </div>
-                            </motion.div>
-                          </div>
-                        ))}
+                        {[ ...weeklyData ].map((d, i) => {
+                          const h = (d.count / maxWeeklyCount) * 100;
+                          return (
+                            <div key={i} className="w-full relative group">
+                              <motion.div
+                                initial={{ height: 0 }}
+                                animate={{ height: `${Math.max(h, 5)}%`, backgroundColor: `${activePalette?.primary || "#39FF14"}CC` }}
+                                whileHover={{ backgroundColor: activePalette?.primary || "#39FF14", scaleY: 1.05 }}
+                                transition={{
+                                  delay: 0.5 + i * 0.1,
+                                  duration: 0.8,
+                                  type: "spring",
+                                }}
+                                className="w-full rounded-t-sm transition-all cursor-pointer relative"
+                              >
+                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] px-2 py-1 rounded-md hidden md:block whitespace-nowrap z-20">
+                                  {d.count} tasks on {new Date(d.date).toLocaleDateString(undefined, { weekday: 'short' })}
+                                </div>
+                              </motion.div>
+                            </div>
+                          )
+                        })}
                       </div>
                     </CardContent>
                   </Card>
@@ -211,9 +337,9 @@ export default function Dashboard() {
                         style={{ borderTopColor: activePalette?.primary || "#39FF14", borderRightColor: activePalette?.primary || "#39FF14", borderBottomColor: activePalette?.secondary || "#8A2BE2" }}
                       >
                         <div className="text-center">
-                          <span className="block text-2xl font-bold">64%</span>
-                          <span className={`${theme.textSecondary} text-xs hidden sm:block`}>
-                            Work
+                          <span className="block text-2xl font-bold">{distributionData[0].percentage}%</span>
+                          <span className={`${theme.textSecondary} text-xs hidden sm:block capitalize`}>
+                            {distributionData[0].category}
                           </span>
                         </div>
                       </motion.div>
@@ -285,16 +411,20 @@ export default function Dashboard() {
 
                 <Card className={`glass-panel p-1 overflow-hidden backdrop-blur-2xl ${theme.cardBg} ${theme.border} ${theme.shadow}`}>
                   <div className="flex flex-col gap-1 md:gap-2">
-                    {FormSelector.map((e) => (
-                      <TaskCard
-                        title={e.title}
-                        description={e.description}
-                        priority={e.priority}
-                        date={e.dueDate}
-                        completed={e.completed}
-                        key={e.id}
-                      />
-                    ))}
+                    {filteredTasks.length === 0 ? (
+                      <div className={`p-8 text-center ${theme.textSecondary}`}>No tasks found matching your search.</div>
+                    ) : (
+                      filteredTasks.map((e) => (
+                        <TaskCard
+                          title={e.title}
+                          description={e.description}
+                          priority={e.priority}
+                          date={e.dueDate}
+                          completed={e.completed}
+                          key={e.id}
+                        />
+                      ))
+                    )}
                   </div>
                 </Card>
 

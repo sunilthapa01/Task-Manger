@@ -22,7 +22,7 @@ const Button = React.forwardRef(({ className, variant = "default", size = "defau
       className={cn(
         "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50",
         {
-          "bg-[linear-gradient(to_right,var(--btn-primary),var(--btn-secondary))] text-white font-semibold hover:brightness-110 shadow-[0_0_15px_var(--btn-glow)] hover:shadow-[0_0_25px_var(--btn-glow-hover)]": variant === "default",
+          "bg-[var(--btn-primary)] text-white font-semibold hover:brightness-110 shadow-[0_0_15px_var(--btn-glow)] hover:shadow-[0_0_25px_var(--btn-glow-hover)]": variant === "default",
           "bg-transparent border border-[var(--btn-primary)] text-[var(--btn-primary)] hover:bg-[var(--btn-ghost-hover)] hover:shadow-[0_0_15px_var(--btn-glow)]": variant === "outline",
           "hover:bg-[var(--btn-ghost-hover)] text-[var(--btn-primary)]": variant === "ghost",
           "h-9 px-4 py-2": size === "default",

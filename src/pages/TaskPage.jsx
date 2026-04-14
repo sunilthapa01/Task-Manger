@@ -19,7 +19,7 @@ export default function TaskPage() {
         <main className="flex-1 overflow-x-hidden overflow-y-auto w-full scroll-smooth">
           <div className="p-4 md:p-8 w-full max-w-4xl mx-auto space-y-8 pb-20 mt-6 md:mt-10">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-[0_0_15px_rgba(57,255,20,0.5)] border border-primary/20">
+              <div className="h-10 w-10 shrink-0 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(57,255,20,0.5)] border border-primary/20">
                 <ClipboardList className="h-5 w-5 text-black" />
               </div>
               <h1 className={`text-2xl md:text-3xl font-bold tracking-tight ${theme.textPrimary}`}>
